@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from routes.test_route import test_bp
@@ -35,9 +35,18 @@ def health():
 @app.route("/generate-report", methods=["POST"])
 @limiter.limit("10 per minute")
 def generate_report():
+    from routes.sanitise import sanitise_input
+    data = request.get_json()
+    text = data.get("text", "") if data else ""
+    
+    clean_text, error = sanitise_input(text)
+    if error:
+        return error
+
     return jsonify({
         "message": "Report endpoint — AI logic coming soon",
-        "status": "ok"
+        "status": "ok",
+        "clean_input": clean_text
     }), 200
 
 if __name__ == "__main__":

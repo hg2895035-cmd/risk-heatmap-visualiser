@@ -1,7 +1,7 @@
 # SECURITY.md — Tool-05: Risk Heatmap Visualiser
 
 **Team:** 8 Members
-**Sprint:** 14 April – 9 May 2026
+**Sprint:** 20 April – 15 May 2026
 **Security Reviewer:** AI Developer 3
 **Status:** In Progress
 
@@ -239,21 +239,41 @@ breaking Demo Day if it happens then.
 
 ---
 
-## 3. Security Tests Log
+## 3. Week 1 Security Test Results — Day 5
 
-| Date | Test                  | Result  | Notes            |
-| ---- | --------------------- | ------- | ---------------- |
-| —    | Week 1 endpoint tests | Pending | Scheduled Day 5  |
-| —    | OWASP ZAP baseline    | Pending | Scheduled Day 7  |
-| —    | OWASP ZAP active scan | Pending | Scheduled Day 11 |
-| —    | PII audit             | Pending | Scheduled Day 9  |
-| —    | Final sign-off        | Pending | Scheduled Day 15 |
+**Date:** 25 April 2026
+**Tester:** AI Developer 3
+
+| #   | Endpoint         | Test              | Expected                      | Result                        | Status |
+| --- | ---------------- | ----------------- | ----------------------------- | ----------------------------- | ------ |
+| 1   | /test-sanitise   | Empty input       | 400 EMPTY_INPUT               | 400 EMPTY_INPUT               | PASS   |
+| 2   | /test-sanitise   | HTML injection    | Tags stripped                 | Tags stripped                 | PASS   |
+| 3   | /test-sanitise   | Prompt injection  | 400 PROMPT_INJECTION_DETECTED | 400 PROMPT_INJECTION_DETECTED | PASS   |
+| 4   | /generate-report | Empty input       | 400 EMPTY_INPUT               | 400 EMPTY_INPUT               | PASS   |
+| 5   | /generate-report | Prompt injection  | 400 PROMPT_INJECTION_DETECTED | 400 PROMPT_INJECTION_DETECTED | PASS   |
+| 6   | /generate-report | Rate limit breach | 429 RATE_LIMIT_EXCEEDED       | 429 RATE_LIMIT_EXCEEDED       | PASS   |
+
+**Summary:** All 6 tests passed. No vulnerabilities found in Week 1.
 
 ---
 
 ---
 
-## 4. Residual Risks
+## 4. Security Tests Log
+
+| Date        | Test                  | Result  | Notes                      |
+| ----------- | --------------------- | ------- | -------------------------- |
+| 24 Apr 2026 | Week 1 endpoint tests | PASS    | All 6 tests passed - Day 5 |
+| —           | OWASP ZAP baseline    | Pending | Scheduled Day 7            |
+| —           | OWASP ZAP active scan | Pending | Scheduled Day 11           |
+| —           | PII audit             | Pending | Scheduled Day 9            |
+| —           | Final sign-off        | Pending | Scheduled Day 15           |
+
+---
+
+---
+
+## 5. Residual Risks
 
 To be completed after all tests are run (Day 15).
 
@@ -261,7 +281,7 @@ To be completed after all tests are run (Day 15).
 
 ---
 
-## 5. Team Sign-Off
+## 6. Team Sign-Off
 
 To be completed on Day 15 by all 6 team members.
 
