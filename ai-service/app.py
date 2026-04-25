@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, jsonify
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from routes.test_route import test_bp
@@ -13,6 +13,15 @@ limiter = Limiter(
     storage_uri="memory://"
 )
 
+# Custom 429 error handler with retry_after
+@app.errorhandler(429)
+def rate_limit_exceeded(e):
+    return jsonify({
+        "error": "Rate limit exceeded",
+        "code": "RATE_LIMIT_EXCEEDED",
+        "retry_after": "60 seconds"
+    }), 429
+
 app.register_blueprint(test_bp)
 
 @app.route("/health", methods=["GET"])
@@ -22,6 +31,14 @@ def health():
         "service": "ai-service",
         "port": 5000
     }
+
+@app.route("/generate-report", methods=["POST"])
+@limiter.limit("10 per minute")
+def generate_report():
+    return jsonify({
+        "message": "Report endpoint — AI logic coming soon",
+        "status": "ok"
+    }), 200
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
