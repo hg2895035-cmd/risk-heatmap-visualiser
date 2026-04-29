@@ -23,3 +23,20 @@ def store_risk(text, result):
         metadatas=[result],
         ids=[str(hash(text))]
     )
+
+def search_similar(text, n_results=3):
+    results = collection.query(
+        query_texts=[text],
+        n_results=n_results
+    )
+
+    output = []
+
+    if results["documents"]:
+        for i in range(len(results["documents"][0])):
+            output.append({
+                "text": results["documents"][0][i],
+                "metadata": results["metadatas"][0][i]
+            })
+
+    return output    
