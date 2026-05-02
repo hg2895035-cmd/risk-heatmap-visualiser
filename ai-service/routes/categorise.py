@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from services.groq_client import GroqClient
 from services.vector_store import store_risk
+from services.cache import get_cached, set_cache
 import json
 
 categorise_bp = Blueprint("categorise", __name__)
@@ -13,34 +14,33 @@ def categorise():
         return jsonify({"error": "Missing 'text' field"}), 400
 
     user_text = data["text"]
+    # Check cache first
+    cached = get_cached(user_text)
+    if cached:
+        return jsonify(cached)
 
     prompt = f"""
-    You are an AI risk analysis system.
+    You are a risk analysis AI.
 
-Analyze the following text and return:
+Analyze the following text and return STRICT JSON ONLY.
 
-1. category (choose one):
-   Cybersecurity, Financial, Operational, Compliance, Reputational
+Text:
+"{user_text}"
 
-2. confidence (0 to 1)
-
-3. severity (Low, Medium, High)
-
-4. impact (integer from 1 to 5)
-
-5. reasoning (short explanation)
-
-Return ONLY valid JSON:
+Return ONLY this JSON format:
 {{
-  "category": "...",
-  "confidence": 0.0,
-  "severity": "...",
-  "impact": 0,
-  "reasoning": "..."
+  "category": "<Financial | Cybersecurity | Operational | Compliance | Reputational>",
+  "confidence": <0 to 1>,
+  "severity": "<Low | Medium | High>",
+  "impact": <1 to 5>,
+  "reasoning": "<short explanation>"
 }}
 
-
-    Text: {user_text}
+Rules:
+- Do NOT add any extra text
+- Do NOT explain anything outside JSON
+- Do NOT use markdown (no ``` )
+- Output MUST be valid JSON only
     """
 
     response = GroqClient.generate_response([
@@ -48,8 +48,10 @@ Return ONLY valid JSON:
     ])
 
     try:
+        
         parsed = json.loads(response)
         store_risk(user_text, parsed)
+        set_cache(user_text, parsed)
         return jsonify(parsed)
     except Exception:
         return jsonify({
