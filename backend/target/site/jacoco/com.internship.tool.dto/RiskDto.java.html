@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RiskDto.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Tool-05 Risk Heatmap Visualiser</a> &gt; <a href="index.source.html" class="el_package">com.internship.tool.dto</a> &gt; <span class="el_source">RiskDto.java</span></div><h1>RiskDto.java</h1><pre class="source lang-java linenums">package com.internship.tool.dto;
+
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+<span class="pc bnc" id="L15" title="All 78 branches missed.">@Data</span>
+<span class="nc" id="L16">@NoArgsConstructor</span>
+<span class="fc" id="L17">@AllArgsConstructor</span>
+<span class="pc" id="L18">@Builder</span>
+public class RiskDto {
+<span class="fc" id="L20">    private UUID id;</span>
+
+    @NotBlank(message = &quot;Title is required&quot;)
+<span class="fc" id="L23">    private String title;</span>
+
+<span class="fc" id="L25">    private String description;</span>
+
+    @NotNull(message = &quot;Likelihood is required&quot;)
+    @Min(value = 1, message = &quot;Likelihood must be at least 1&quot;)
+    @Max(value = 5, message = &quot;Likelihood must be at most 5&quot;)
+<span class="fc" id="L30">    private Integer likelihood;</span>
+
+    @NotNull(message = &quot;Impact is required&quot;)
+    @Min(value = 1, message = &quot;Impact must be at least 1&quot;)
+    @Max(value = 5, message = &quot;Impact must be at most 5&quot;)
+<span class="fc" id="L35">    private Integer impact;</span>
+
+    @NotBlank(message = &quot;Status is required&quot;)
+<span class="fc" id="L38">    private String status;</span>
+
+<span class="fc" id="L40">    private String assigneeEmail;</span>
+
+<span class="nc" id="L42">    private LocalDateTime createdAt;</span>
+<span class="nc" id="L43">    private LocalDateTime updatedAt;</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

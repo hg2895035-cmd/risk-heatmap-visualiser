@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RiskServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Tool-05 Risk Heatmap Visualiser</a> &gt; <a href="index.source.html" class="el_package">com.internship.tool.service</a> &gt; <span class="el_source">RiskServiceImpl.java</span></div><h1>RiskServiceImpl.java</h1><pre class="source lang-java linenums">package com.internship.tool.service;
+
+import com.internship.tool.dto.RiskDto;
+import com.internship.tool.entity.Risk;
+import com.internship.tool.exception.ResourceNotFoundException;
+import com.internship.tool.exception.ValidationException;
+import com.internship.tool.repository.RiskRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
+import java.util.UUID;
+
+@Service
+<span class="fc" id="L18">@RequiredArgsConstructor</span>
+public class RiskServiceImpl implements RiskService {
+
+    private final RiskRepository riskRepository;
+    private final EmailService emailService;
+
+    @Override
+    @Cacheable(value = &quot;risks&quot;, key = &quot;#pageable.pageNumber + '-' + #pageable.pageSize&quot;)
+    public Page&lt;RiskDto&gt; getAllRisks(Pageable pageable) {
+<span class="fc" id="L27">        return riskRepository.findAll(pageable).map(this::mapToDto);</span>
+    }
+
+    @Override
+    @Cacheable(value = &quot;risk&quot;, key = &quot;#id&quot;)
+    public RiskDto getRiskById(UUID id) {
+<span class="fc" id="L33">        Risk risk = riskRepository.findById(id)</span>
+<span class="fc" id="L34">                .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Risk not found with id: &quot; + id));</span>
+<span class="fc" id="L35">        return mapToDto(risk);</span>
+    }
+
+    @Override
+    @CacheEvict(value = {&quot;risks&quot;, &quot;risk&quot;}, allEntries = true)
+    public RiskDto createRisk(RiskDto riskDto) {
+<span class="fc bfc" id="L41" title="All 4 branches covered.">        if (riskDto.getLikelihood() == null || riskDto.getImpact() == null) {</span>
+<span class="fc" id="L42">            throw new ValidationException(&quot;Likelihood and Impact are required.&quot;);</span>
+        }
+
+<span class="fc" id="L45">        Risk risk = mapToEntity(riskDto);</span>
+<span class="fc" id="L46">        Risk savedRisk = riskRepository.save(risk);</span>
+        
+<span class="fc bfc" id="L48" title="All 4 branches covered.">        if (savedRisk.getAssigneeEmail() != null &amp;&amp; !savedRisk.getAssigneeEmail().isEmpty()) {</span>
+<span class="fc" id="L49">            emailService.sendRiskCreatedEmail(savedRisk.getAssigneeEmail(), savedRisk.getTitle(), savedRisk.getId());</span>
+        }
+
+<span class="fc" id="L52">        return mapToDto(savedRisk);</span>
+    }
+
+    private RiskDto mapToDto(Risk risk) {
+<span class="fc" id="L56">        return RiskDto.builder()</span>
+<span class="fc" id="L57">                .id(risk.getId())</span>
+<span class="fc" id="L58">                .title(risk.getTitle())</span>
+<span class="fc" id="L59">                .description(risk.getDescription())</span>
+<span class="fc" id="L60">                .likelihood(risk.getLikelihood())</span>
+<span class="fc" id="L61">                .impact(risk.getImpact())</span>
+<span class="fc" id="L62">                .status(risk.getStatus())</span>
+<span class="fc" id="L63">                .assigneeEmail(risk.getAssigneeEmail())</span>
+<span class="fc" id="L64">                .createdAt(risk.getCreatedAt())</span>
+<span class="fc" id="L65">                .updatedAt(risk.getUpdatedAt())</span>
+<span class="fc" id="L66">                .build();</span>
+    }
+
+    private Risk mapToEntity(RiskDto riskDto) {
+<span class="fc" id="L70">        return Risk.builder()</span>
+<span class="fc" id="L71">                .title(riskDto.getTitle())</span>
+<span class="fc" id="L72">                .description(riskDto.getDescription())</span>
+<span class="fc" id="L73">                .likelihood(riskDto.getLikelihood())</span>
+<span class="fc" id="L74">                .impact(riskDto.getImpact())</span>
+<span class="fc" id="L75">                .status(riskDto.getStatus())</span>
+<span class="fc" id="L76">                .assigneeEmail(riskDto.getAssigneeEmail())</span>
+<span class="fc" id="L77">                .build();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

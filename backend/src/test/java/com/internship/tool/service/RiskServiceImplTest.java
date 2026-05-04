@@ -105,7 +105,7 @@ class RiskServiceImplTest {
         assertNotNull(result);
         assertEquals(risk.getTitle(), result.getTitle());
         verify(riskRepository, times(1)).save(any(Risk.class));
-        verify(emailService, times(1)).sendCreationEmail(risk.getAssigneeEmail(), risk.getTitle());
+        verify(emailService, times(1)).sendRiskCreatedEmail(risk.getAssigneeEmail(), risk.getTitle(), risk.getId());
     }
 
     // 5. Test create risk missing likelihood throws ValidationException
@@ -136,7 +136,7 @@ class RiskServiceImplTest {
         RiskDto result = riskService.createRisk(riskDto);
 
         assertNotNull(result);
-        verify(emailService, never()).sendCreationEmail(anyString(), anyString());
+        verify(emailService, never()).sendRiskCreatedEmail(anyString(), anyString(), any(UUID.class));
     }
 
     // 8. Test create risk with empty email doesn't call EmailService
@@ -149,7 +149,7 @@ class RiskServiceImplTest {
         RiskDto result = riskService.createRisk(riskDto);
 
         assertNotNull(result);
-        verify(emailService, never()).sendCreationEmail(anyString(), anyString());
+        verify(emailService, never()).sendRiskCreatedEmail(anyString(), anyString(), any(UUID.class));
     }
 
     // 9. Test get all risks returns empty page

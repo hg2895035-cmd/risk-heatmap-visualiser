@@ -1,0 +1,121 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: tool05_postgres
+    environment:
+      POSTGRES_DB: risk_heatmap
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-jdkyzm3v32@CR}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: tool05_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: tool05_backend
+    ports:
+      - "8080:8080"
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: risk_heatmap
+      DB_USER: postgres
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set}
+      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS:-86400000}
+      SPRING_MAIL_HOST: ${SPRING_MAIL_HOST:-smtp.gmail.com}
+      SPRING_MAIL_PORT: ${SPRING_MAIL_PORT:-587}
+      SPRING_MAIL_USERNAME: ${SPRING_MAIL_USERNAME:-}
+      SPRING_MAIL_PASSWORD: ${SPRING_MAIL_PASSWORD:-}
+      AI_SERVICE_URL: http://ai-service:5000
+      AI_SERVICE_TIMEOUT_MS: ${AI_SERVICE_TIMEOUT_MS:-10000}
+      APP_BASE_URL: ${APP_BASE_URL:-http://localhost:8080}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+      MANAGEMENT_HEALTH_MAIL_ENABLED: "false"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:8080/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+    restart: unless-stopped
+
+  ai-service:
+    build:
+      context: ./ai-service
+      dockerfile: Dockerfile
+    container_name: tool05_ai
+    ports:
+      - "5000:5000"
+    environment:
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      CHROMA_PERSIST_DIR: /app/chroma_data
+      REDIS_HOST: redis
+      REDIS_HOST_PORT: 6379
+      FLASK_ENV: ${FLASK_ENV:-production}
+      FLASK_DEBUG: ${FLASK_DEBUG:-0}
+    volumes:
+      - chroma_data:/app/chroma_data
+      - ./ai-service/data:/app/data:ro
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:5000/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: tool05_frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+  chroma_data:
+
+networks:
+  default:
+    name: tool05_network

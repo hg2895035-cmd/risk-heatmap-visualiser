@@ -1,43 +1,55 @@
 package com.internship.tool.controller;
 
-import com.internship.tool.service.FileStorageService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Map;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 @RestController
 @RequestMapping("/api/files")
 @RequiredArgsConstructor
-@Tag(name = "File Upload", description = "APIs for file upload and download")
+@Tag(name = "Files", description = "File management endpoints")
+@SecurityRequirement(name = "Bearer Authentication")
 public class FileController {
 
-    private final FileStorageService fileStorageService;
+    private static final String UPLOAD_DIR = System.getProperty("java.io.tmpdir") + "/uploads/";
 
-    @Operation(summary = "Upload a file")
-    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Map<String, String>> uploadFile(@RequestParam("file") MultipartFile file) {
-        String fileName = fileStorageService.storeFile(file);
-        return ResponseEntity.ok(Map.of(
-                "fileName", fileName,
-                "message", "File uploaded successfully"
-        ));
-    }
+    @GetMapping("/{filename}")
+    @Operation(summary = "Download file", description = "Download an uploaded file")
+    public ResponseEntity<Resource> downloadFile(@PathVariable String filename) {
+        try {
+            Path filePath = Paths.get(UPLOAD_DIR).resolve(filename);
+            Resource resource = new UrlResource(filePath.toUri());
 
-    @Operation(summary = "Download a file")
-    @GetMapping("/{fileName:.+}")
-    public ResponseEntity<Resource> downloadFile(@PathVariable String fileName) {
-        Resource resource = fileStorageService.loadFileAsResource(fileName);
-        
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
-                .body(resource);
+            if (resource.exists() && resource.isReadable()) {
+                String contentType = "application/octet-stream";
+                if (filename.endsWith(".pdf")) {
+                    contentType = "application/pdf";
+                } else if (filename.endsWith(".png")) {
+                    contentType = "image/png";
+                } else if (filename.endsWith(".jpg") || filename.endsWith(".jpeg")) {
+                    contentType = "image/jpeg";
+                }
+
+                return ResponseEntity.ok()
+                        .contentType(MediaType.parseMediaType(contentType))
+                        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                        .body(resource);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
 }

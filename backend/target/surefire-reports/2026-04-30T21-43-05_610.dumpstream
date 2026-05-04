@@ -1,0 +1,5 @@
+# Created at 2026-04-30T21:43:06.191
+Boot Manifest-JAR contains absolute paths in classpath 'E:\InternShip_CampusPe\Backend\risk-heatmap-visualiser\backend\target\test-classes'
+Hint: <argLine>-Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
+'other' has different root
+

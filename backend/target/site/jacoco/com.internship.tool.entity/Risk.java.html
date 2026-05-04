@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Risk.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Tool-05 Risk Heatmap Visualiser</a> &gt; <a href="index.source.html" class="el_package">com.internship.tool.entity</a> &gt; <span class="el_source">Risk.java</span></div><h1>Risk.java</h1><pre class="source lang-java linenums">package com.internship.tool.entity;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+@Entity
+@Table(name = &quot;risks&quot;)
+<span class="pc bnc" id="L17" title="All 78 branches missed.">@Data</span>
+<span class="nc" id="L18">@NoArgsConstructor</span>
+<span class="fc" id="L19">@AllArgsConstructor</span>
+<span class="pc" id="L20">@Builder</span>
+@EntityListeners(AuditingEntityListener.class)
+public class Risk {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+<span class="fc" id="L26">    private UUID id;</span>
+
+    @Column(nullable = false, length = 255)
+<span class="fc" id="L29">    private String title;</span>
+
+    @Column(columnDefinition = &quot;TEXT&quot;)
+<span class="fc" id="L32">    private String description;</span>
+
+    @Column(nullable = false)
+<span class="fc" id="L35">    private Integer likelihood;</span>
+
+    @Column(nullable = false)
+<span class="fc" id="L38">    private Integer impact;</span>
+
+    @Column(nullable = false, length = 50)
+<span class="fc" id="L41">    private String status;</span>
+
+    @Column(name = &quot;assignee_email&quot;)
+<span class="fc" id="L44">    private String assigneeEmail;</span>
+
+    @CreatedDate
+    @Column(name = &quot;created_at&quot;, nullable = false, updatable = false)
+<span class="fc" id="L48">    private LocalDateTime createdAt;</span>
+
+    @LastModifiedDate
+    @Column(name = &quot;updated_at&quot;)
+<span class="fc" id="L52">    private LocalDateTime updatedAt;</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

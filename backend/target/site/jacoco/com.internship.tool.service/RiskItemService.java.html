@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RiskItemService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Tool-05 Risk Heatmap Visualiser</a> &gt; <a href="index.source.html" class="el_package">com.internship.tool.service</a> &gt; <span class="el_source">RiskItemService.java</span></div><h1>RiskItemService.java</h1><pre class="source lang-java linenums">package com.internship.tool.service;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.internship.tool.exception.ResourceNotFoundException;
+import com.internship.tool.exception.ValidationException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+@Service
+<span class="fc" id="L34">@RequiredArgsConstructor</span>
+<span class="fc" id="L35">@Slf4j</span>
+public class RiskItemService {
+
+    private final EmailService emailService;
+    private final ObjectMapper objectMapper;
+
+    @Cacheable(value = &quot;risks&quot;, key = &quot;#page + '-' + #size + '-' + #sortBy + '-' + #sortDir&quot;)
+    public Page&lt;Map&lt;String, Object&gt;&gt; getAllRisks(int page, int size, String sortBy, String sortDir) {
+<span class="fc" id="L43">        return Page.empty();</span>
+    }
+
+    public Map&lt;String, Object&gt; getRiskById(Long id) {
+<span class="fc" id="L47">        return new HashMap&lt;&gt;();</span>
+    }
+
+    @CacheEvict(value = {&quot;risks&quot;, &quot;stats&quot;}, allEntries = true)
+    @Transactional
+    public Map&lt;String, Object&gt; create(Map&lt;String, Object&gt; request) {
+<span class="fc" id="L53">        log.info(&quot;Risk created&quot;);</span>
+<span class="fc" id="L54">        return new HashMap&lt;&gt;();</span>
+    }
+
+    @Async
+    @Transactional(readOnly = true)
+    public void triggerAiAnalysisAsync(Long riskId) {
+        // AI analysis implementation removed due to missing dependencies
+<span class="nc" id="L61">    }</span>
+
+    @CacheEvict(value = {&quot;risks&quot;, &quot;stats&quot;}, allEntries = true)
+    @Transactional
+    public Map&lt;String, Object&gt; update(Long id, Map&lt;String, Object&gt; request) {
+<span class="nc" id="L66">        log.info(&quot;Risk updated: {}&quot;, id);</span>
+<span class="nc" id="L67">        return new HashMap&lt;&gt;();</span>
+    }
+
+    @CacheEvict(value = {&quot;risks&quot;, &quot;stats&quot;}, allEntries = true)
+    @Transactional
+    public void delete(Long id) {
+<span class="nc" id="L73">        log.info(&quot;Risk soft deleted: {}&quot;, id);</span>
+<span class="nc" id="L74">    }</span>
+
+    @Cacheable(value = &quot;stats&quot;)
+    public Map&lt;String, Object&gt; getStats() {
+<span class="nc" id="L78">        return new HashMap&lt;&gt;();</span>
+    }
+
+    public Page&lt;Map&lt;String, Object&gt;&gt; search(String query, int page, int size) {
+<span class="nc" id="L82">        return Page.empty();</span>
+    }
+
+    @CacheEvict(value = {&quot;risks&quot;, &quot;stats&quot;}, allEntries = true)
+    @Transactional
+    public String uploadFile(Long riskId, MultipartFile file) {
+<span class="nc bnc" id="L88" title="All 2 branches missed.">        if (file.getSize() &gt; 10 * 1024 * 1024) {</span>
+<span class="nc" id="L89">            throw new ValidationException(&quot;File size must be less than 10MB&quot;);</span>
+        }
+
+<span class="nc" id="L92">        String contentType = file.getContentType();</span>
+<span class="nc bnc" id="L93" title="All 4 branches missed.">        if (contentType == null || !contentType.startsWith(&quot;application/&quot;) &amp;&amp;</span>
+<span class="nc bnc" id="L94" title="All 4 branches missed.">                !contentType.equals(&quot;image/png&quot;) &amp;&amp; !contentType.equals(&quot;image/jpeg&quot;)) {</span>
+<span class="nc" id="L95">            throw new ValidationException(&quot;Invalid file type. Allowed: PDF, DOC, DOCX, XLS, XLSX, PNG, JPEG&quot;);</span>
+        }
+
+        try {
+<span class="nc" id="L99">            String uploadDir = System.getProperty(&quot;java.io.tmpdir&quot;) + &quot;/uploads/&quot;;</span>
+<span class="nc" id="L100">            Files.createDirectories(Paths.get(uploadDir));</span>
+
+<span class="nc" id="L102">            String originalFilename = file.getOriginalFilename();</span>
+<span class="nc" id="L103">            String extension = &quot;&quot;;</span>
+<span class="nc bnc" id="L104" title="All 4 branches missed.">            if (originalFilename != null &amp;&amp; originalFilename.contains(&quot;.&quot;)) {</span>
+<span class="nc" id="L105">                extension = originalFilename.substring(originalFilename.lastIndexOf(&quot;.&quot;));</span>
+<span class="nc" id="L106">                extension = extension.replaceAll(&quot;[^a-zA-Z0-9.]&quot;, &quot;&quot;);</span>
+<span class="nc bnc" id="L107" title="All 2 branches missed.">                if (extension.length() &gt; 10) {</span>
+<span class="nc" id="L108">                    extension = extension.substring(0, 10);</span>
+                }
+            }
+<span class="nc" id="L111">            String storedFilename = UUID.randomUUID().toString() + extension;</span>
+
+<span class="nc" id="L113">            Path filePath = Paths.get(uploadDir, storedFilename).normalize();</span>
+<span class="nc bnc" id="L114" title="All 2 branches missed.">            if (!filePath.startsWith(Paths.get(uploadDir).normalize())) {</span>
+<span class="nc" id="L115">                throw new ValidationException(&quot;Invalid file path&quot;);</span>
+            }
+
+<span class="nc" id="L118">            Files.write(filePath, file.getBytes());</span>
+
+<span class="nc" id="L120">            log.info(&quot;File uploaded for risk {}: {}&quot;, riskId, storedFilename);</span>
+<span class="nc" id="L121">            return storedFilename;</span>
+<span class="nc" id="L122">        } catch (IOException e) {</span>
+<span class="nc" id="L123">            throw new ValidationException(&quot;Failed to store file: &quot; + e.getMessage());</span>
+        }
+    }
+
+    public List&lt;Map&lt;String, Object&gt;&gt; getOverdueRisks() {
+<span class="nc" id="L128">        return List.of();</span>
+    }
+
+    private Long getCurrentUserId() {
+<span class="nc" id="L132">        return 1L;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

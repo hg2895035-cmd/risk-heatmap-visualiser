@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EmailService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Tool-05 Risk Heatmap Visualiser</a> &gt; <a href="index.source.html" class="el_package">com.internship.tool.service</a> &gt; <span class="el_source">EmailService.java</span></div><h1>EmailService.java</h1><pre class="source lang-java linenums">package com.internship.tool.service;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
+
+import jakarta.mail.internet.MimeMessage;
+import java.util.UUID;
+
+@Service
+<span class="nc" id="L17">@RequiredArgsConstructor</span>
+<span class="fc" id="L18">@Slf4j</span>
+public class EmailService {
+
+    private final JavaMailSender mailSender;
+    private final TemplateEngine templateEngine;
+
+    @Value(&quot;${spring.mail.username: noreply@tool05.com}&quot;)
+    private String fromEmail;
+
+    @Value(&quot;${app.base-url: http://localhost:8080}&quot;)
+    private String baseUrl;
+
+    @Async
+    public void sendRiskCreatedEmail(String toEmail, String riskTitle, UUID riskId) {
+        try {
+<span class="nc" id="L33">            Context context = new Context();</span>
+<span class="nc" id="L34">            context.setVariable(&quot;riskTitle&quot;, riskTitle);</span>
+<span class="nc" id="L35">            context.setVariable(&quot;riskId&quot;, riskId);</span>
+<span class="nc" id="L36">            context.setVariable(&quot;baseUrl&quot;, baseUrl);</span>
+
+<span class="nc" id="L38">            String htmlContent = templateEngine.process(&quot;email-template&quot;, context);</span>
+
+<span class="nc" id="L40">            MimeMessage message = mailSender.createMimeMessage();</span>
+<span class="nc" id="L41">            MimeMessageHelper helper = new MimeMessageHelper(message, true, &quot;UTF-8&quot;);</span>
+
+<span class="nc" id="L43">            helper.setFrom(fromEmail);</span>
+<span class="nc" id="L44">            helper.setTo(toEmail);</span>
+<span class="nc" id="L45">            helper.setSubject(&quot;New Risk Created: &quot; + riskTitle);</span>
+<span class="nc" id="L46">            helper.setText(htmlContent, true);</span>
+
+<span class="nc" id="L48">            mailSender.send(message);</span>
+<span class="nc" id="L49">            log.info(&quot;Risk created email sent to {} for risk #{}&quot;, toEmail, riskId);</span>
+<span class="nc" id="L50">        } catch (Exception e) {</span>
+<span class="nc" id="L51">            log.error(&quot;Failed to send risk created email: {}&quot;, e.getMessage());</span>
+<span class="nc" id="L52">        }</span>
+<span class="nc" id="L53">    }</span>
+
+    @Async
+    public void sendOverdueReminderEmail(String toEmail, String riskTitle, UUID riskId, String ownerName) {
+        try {
+<span class="nc" id="L58">            Context context = new Context();</span>
+<span class="nc" id="L59">            context.setVariable(&quot;riskTitle&quot;, riskTitle);</span>
+<span class="nc" id="L60">            context.setVariable(&quot;riskId&quot;, riskId);</span>
+<span class="nc" id="L61">            context.setVariable(&quot;ownerName&quot;, ownerName);</span>
+<span class="nc" id="L62">            context.setVariable(&quot;baseUrl&quot;, baseUrl);</span>
+
+<span class="nc" id="L64">            String htmlContent = templateEngine.process(&quot;email-template&quot;, context);</span>
+
+<span class="nc" id="L66">            MimeMessage message = mailSender.createMimeMessage();</span>
+<span class="nc" id="L67">            MimeMessageHelper helper = new MimeMessageHelper(message, true, &quot;UTF-8&quot;);</span>
+
+<span class="nc" id="L69">            helper.setFrom(fromEmail);</span>
+<span class="nc" id="L70">            helper.setTo(toEmail);</span>
+<span class="nc" id="L71">            helper.setSubject(&quot;OVERDUE: Risk requires attention - &quot; + riskTitle);</span>
+<span class="nc" id="L72">            helper.setText(htmlContent, true);</span>
+
+<span class="nc" id="L74">            mailSender.send(message);</span>
+<span class="nc" id="L75">            log.info(&quot;Overdue reminder email sent to {} for risk #{}&quot;, toEmail, riskId);</span>
+<span class="nc" id="L76">        } catch (Exception e) {</span>
+<span class="nc" id="L77">            log.error(&quot;Failed to send overdue reminder email: {}&quot;, e.getMessage());</span>
+<span class="nc" id="L78">        }</span>
+<span class="nc" id="L79">    }</span>
+
+    @Async
+    public void sendWeeklySummaryEmail(String toEmail, int totalRisks, int overdueCount, int highScoreCount) {
+        try {
+<span class="nc" id="L84">            Context context = new Context();</span>
+<span class="nc" id="L85">            context.setVariable(&quot;totalRisks&quot;, totalRisks);</span>
+<span class="nc" id="L86">            context.setVariable(&quot;overdueCount&quot;, overdueCount);</span>
+<span class="nc" id="L87">            context.setVariable(&quot;highScoreCount&quot;, highScoreCount);</span>
+<span class="nc" id="L88">            context.setVariable(&quot;baseUrl&quot;, baseUrl);</span>
+
+<span class="nc" id="L90">            String htmlContent = templateEngine.process(&quot;email-template&quot;, context);</span>
+
+<span class="nc" id="L92">            MimeMessage message = mailSender.createMimeMessage();</span>
+<span class="nc" id="L93">            MimeMessageHelper helper = new MimeMessageHelper(message, true, &quot;UTF-8&quot;);</span>
+
+<span class="nc" id="L95">            helper.setFrom(fromEmail);</span>
+<span class="nc" id="L96">            helper.setTo(toEmail);</span>
+<span class="nc" id="L97">            helper.setSubject(&quot;Weekly Risk Summary - &quot; + totalRisks + &quot; total risks&quot;);</span>
+<span class="nc" id="L98">            helper.setText(htmlContent, true);</span>
+
+<span class="nc" id="L100">            mailSender.send(message);</span>
+<span class="nc" id="L101">            log.info(&quot;Weekly summary email sent to {}&quot;, toEmail);</span>
+<span class="nc" id="L102">        } catch (Exception e) {</span>
+<span class="nc" id="L103">            log.error(&quot;Failed to send weekly summary email: {}&quot;, e.getMessage());</span>
+<span class="nc" id="L104">        }</span>
+<span class="nc" id="L105">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
