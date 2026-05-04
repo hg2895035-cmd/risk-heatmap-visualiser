@@ -40,24 +40,26 @@ class GroqClient:
 
         for attempt in range(retries):
             try:
-                response = requests.post(GROQ_URL, headers=headers, json=payload)
-                response.raise_for_status()
-
+                response = requests.post(GROQ_URL, headers=headers, json=payload, timeout=10)
                 data = response.json()
+
+                content = data.get("choices", [{}])[0].get("message", {}).get("content")
+                if not content:
+                    raise ValueError("Empty response from Groq API")
                 return {
-                        "content": data["choices"][0]["message"]["content"],
+                        "content": content,
                         "tokens": data.get("usage", {}).get("total_tokens", 0), 
                         "error":False}
             
 
             except Exception as e:
-                logging.error(f"Groq API error (attempt {attempt+1}): {e}")
+                logging.error(f"Groq API error (attempt {attempt+1})/{retries}): {e}")
                 time.sleep(backoff ** attempt)
 
         # fallback if all retries fail
         return {
             
-            "content": None,
+            "content": "",
             "tokens": 0,
             "error": True
 

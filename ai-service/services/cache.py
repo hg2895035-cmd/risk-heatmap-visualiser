@@ -1,4 +1,5 @@
 import hashlib
+import logging
 
 # In-memory store
 cache_store = {}
@@ -19,18 +20,18 @@ def get_cached(text):
 
     if key in cache_store:
         HIT_KEY += 1
-        print(f"✅ CACHE HIT: {key}")
+        logging.info(f"Cache hit: {key}")
         return cache_store[key]
 
     MISS_KEY += 1
-    print(f"❌ CACHE MISS: {key}")
+    logging.info(f"Cache miss: {key}")
     return None
 
 
 def set_cache(text, value):
     key = generate_key(text)
     cache_store[key] = value
-    print(f"💾 STORED IN CACHE: {key}")
+    logging.info(f"Stored in cache: {key}")
 
 
 def get_stats():

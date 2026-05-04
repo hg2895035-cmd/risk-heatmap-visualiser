@@ -3,10 +3,11 @@ from threading import Thread
 from services.job_store import create_job, update_job, get_job
 from services.groq_client import GroqClient
 import json
+import logging
 
 generate_report_bp = Blueprint("generate_report", __name__)
 
-# 🔹 Background processing
+#  Background processing
 def process_report(job_id, user_text):
     prompt = f"""
     You are a risk analysis AI.
@@ -36,26 +37,33 @@ def process_report(job_id, user_text):
     
 
     try:
-        response_text = response["content"]
-        print("RAW TEXT:", response_text)  
-        cleaned = response_text.replace("```json", "").replace("```", "").strip()
+        response_text = response["content"]  
+        cleaned = response_text.strip().replace("```json", "").replace("```", "")
         
         # extract JSON safely
         start = cleaned.find("{")
         end = cleaned.rfind("}")
         if start != -1 and end != -1:
             cleaned = cleaned[start:end+1]
-
-        parsed = json.loads(cleaned)
-
-        update_job(job_id, parsed)
+            try:
+                parsed = json.loads(cleaned)
+            except Exception:
+                
+                parsed = {
+                    "title": "Risk Report",
+                    "executive_summary": "Unable to generate full report",
+                    "overview": "Partial failure in AI response",
+                    "top_items": [],
+                    "recommendations": []
+                }    
+            update_job(job_id, parsed)
 
     except Exception as e:
-        print("❌ REPORT ERROR:", e)
-        update_job(job_id, {"error": "Failed to generate report"})
+        logging.error(f"Report generation failed: {e}")
+        update_job(job_id, {"error": "Unable to generate report"})
 
 
-# 🔹 Create job (ASYNC)
+# Create job (ASYNC)
 @generate_report_bp.route("/generate-report", methods=["POST"])
 def generate_report():
     data = request.get_json()
@@ -76,7 +84,7 @@ def generate_report():
     })
 
 
-# 🔹 Check job status
+#  Check job status
 @generate_report_bp.route("/job/<job_id>", methods=["GET"])
 def get_job_status(job_id):
     job = get_job(job_id)

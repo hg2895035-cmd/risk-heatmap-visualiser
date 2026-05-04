@@ -1,0 +1,5 @@
+1. Company may face financial loss due to market volatility
+2. Weak authentication system can lead to cyber attacks
+3. Delay in supply chain may disrupt operations
+4. Data breach may expose customer information
+5. Regulatory compliance failure may result in penalties

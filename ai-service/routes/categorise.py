@@ -4,6 +4,7 @@ from services.groq_client import GroqClient
 from services.vector_store import store_risk
 import time 
 import json
+import logging 
 
 def rule_based_category(text):
     text = text.lower()
@@ -30,11 +31,13 @@ def categorise():
     start_time = time.time()
     # Check cache first
     cached = get_cached(user_text)
-    print("CACHE RESULT:", cached)
+    
     if cached:
-        cached_copy = dict(cached)  # avoid mutating stored data
+        logging.info("Cache hit")
+        cached_copy = dict(cached)  
         cached_copy["meta"]["cached"] = True
         return jsonify(cached_copy)
+    logging.info("Cache miss")
 
     prompt = f"""
     You are a risk analysis AI.
@@ -89,7 +92,7 @@ Rules:
         if "{" in cleaned:
             cleaned = cleaned[cleaned.index("{"):]
 
-        parsed = json.loads(cleaned) 
+         
         try: 
             cleaned = response_text.strip().replace("```json", "").replace("```", "")
             start = cleaned.find("{")
@@ -114,16 +117,16 @@ Rules:
             "response_time_ms": response_time,
             "cached": False
         }
-        print("👉 BEFORE CACHE STORE")   # DEBUG
+        
         set_cache(user_text, parsed)
-        print("👉 AFTER CACHE STORE")    # DEBUG
+        
         store_risk(user_text, parsed)
         return jsonify(parsed)
     except Exception:
         return jsonify({
             "category": "Unknown",
             "confidence": 0.0,
-            "reasoning": "Failed to parse AI response",
+            "reasoning": "Unable to process request",
             "meta": {
                 "confidence": 0,
                 "model_used": "llama-3.3-70b-versatile",
