@@ -46,11 +46,19 @@ class GroqClient:
                 data = response.json()
                 return {
                         "content": data["choices"][0]["message"]["content"],
-                        "tokens": data.get("usage", {}).get("total_tokens", 0)}
+                        "tokens": data.get("usage", {}).get("total_tokens", 0), 
+                        "error":False}
+            
 
             except Exception as e:
                 logging.error(f"Groq API error (attempt {attempt+1}): {e}")
                 time.sleep(backoff ** attempt)
 
         # fallback if all retries fail
-        return "AI service temporarily unavailable. Please try again later."
+        return {
+            
+            "content": None,
+            "tokens": 0,
+            "error": True
+
+        }

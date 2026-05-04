@@ -5,6 +5,18 @@ from services.vector_store import store_risk
 import time 
 import json
 
+def rule_based_category(text):
+    text = text.lower()
+
+    if "hack" in text or "breach" in text:
+        return "Cybersecurity"
+    if "loss" in text or "financial" in text:
+        return "Financial"
+    if "delay" in text or "failure" in text:
+        return "Operational"
+
+    return "Operational"
+
 categorise_bp = Blueprint("categorise", __name__)
 
 @categorise_bp.route("/categorise", methods=["POST"])
@@ -51,6 +63,20 @@ Rules:
     ai_response = GroqClient.generate_response([
         {"role": "user", "content": prompt}
     ])
+    if ai_response.get("error") or not ai_response.get("content"):
+       return jsonify({
+           "category": "Operational",
+           "confidence": 0.3,
+           "reasoning": "AI service unavailable, fallback applied",
+           "meta": {
+               "confidence": 0.3,
+               "model_used": "fallback",
+               "tokens_used": 0,
+               "response_time_ms": 0,
+               "cached": False
+            }
+        })
+
     response_text = ai_response["content"]
     tokens_used = ai_response.get("tokens", 0)
 
@@ -63,7 +89,22 @@ Rules:
         if "{" in cleaned:
             cleaned = cleaned[cleaned.index("{"):]
 
-        parsed = json.loads(cleaned)    
+        parsed = json.loads(cleaned) 
+        try: 
+            cleaned = response_text.strip().replace("```json", "").replace("```", "")
+            start = cleaned.find("{")
+            end = cleaned.rfind("}")
+            if start != -1 and end != -1:
+                cleaned = cleaned[start:end+1]
+            parsed = json.loads(cleaned)    
+        except Exception:
+            parsed = {
+                "category": rule_based_category(user_text),
+                "confidence": 0.5,
+                "severity": "Medium",
+                "impact": 3,
+                "reasoning": "Rule-based fallback used"
+            }      
 
         response_time = int((time.time() - start_time) * 1000)
         parsed["meta"]= {
