@@ -20,7 +20,7 @@ public class AuthController {
     @Operation(summary = "Generate a JWT token for testing")
     @PostMapping("/login")
     public ResponseEntity<Map<String, String>> login(@RequestParam String username) {
-        String token = jwtUtil.generateToken(username);
+        String token = jwtUtil.generateToken(username, "ROLE_ADMIN", 1L);
         return ResponseEntity.ok(Map.of("token", token));
     }
 }

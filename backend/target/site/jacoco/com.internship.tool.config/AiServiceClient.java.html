@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AiServiceClient.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Tool-05 Risk Heatmap Visualiser</a> &gt; <a href="index.source.html" class="el_package">com.internship.tool.config</a> &gt; <span class="el_source">AiServiceClient.java</span></div><h1>AiServiceClient.java</h1><pre class="source lang-java linenums">package com.internship.tool.config;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.http.*;
+import org.springframework.boot.web.client.RestTemplateBuilder;
+
+import java.time.Duration;
+import java.util.Map;
+
+@Component
+public class AiServiceClient {
+
+    private final RestTemplate restTemplate;
+
+    @Value(&quot;${ai.service.url:http://localhost:5000}&quot;)
+    private String aiServiceUrl;
+
+<span class="nc" id="L20">    public AiServiceClient(RestTemplateBuilder builder) {</span>
+<span class="nc" id="L21">        this.restTemplate = builder</span>
+<span class="nc" id="L22">                .setConnectTimeout(Duration.ofSeconds(10))</span>
+<span class="nc" id="L23">                .setReadTimeout(Duration.ofSeconds(10))</span>
+<span class="nc" id="L24">                .build();</span>
+<span class="nc" id="L25">    }</span>
+
+    // Call /describe endpoint
+    public String describe(String text) {
+        try {
+<span class="nc" id="L30">            HttpHeaders headers = new HttpHeaders();</span>
+<span class="nc" id="L31">            headers.setContentType(MediaType.APPLICATION_JSON);</span>
+<span class="nc" id="L32">            Map&lt;String, String&gt; body = Map.of(&quot;text&quot;, text);</span>
+<span class="nc" id="L33">            HttpEntity&lt;Map&lt;String, String&gt;&gt; request = new HttpEntity&lt;&gt;(body, headers);</span>
+<span class="nc" id="L34">            ResponseEntity&lt;String&gt; response = restTemplate.postForEntity(</span>
+                    aiServiceUrl + &quot;/describe&quot;, request, String.class);
+<span class="nc" id="L36">            return response.getBody();</span>
+<span class="nc" id="L37">        } catch (Exception e) {</span>
+<span class="nc" id="L38">            System.err.println(&quot;AI Service /describe failed: &quot; + e.getMessage());</span>
+<span class="nc" id="L39">            return null;</span>
+        }
+    }
+
+    // Call /recommend endpoint
+    public String recommend(String text) {
+        try {
+<span class="nc" id="L46">            HttpHeaders headers = new HttpHeaders();</span>
+<span class="nc" id="L47">            headers.setContentType(MediaType.APPLICATION_JSON);</span>
+<span class="nc" id="L48">            Map&lt;String, String&gt; body = Map.of(&quot;text&quot;, text);</span>
+<span class="nc" id="L49">            HttpEntity&lt;Map&lt;String, String&gt;&gt; request = new HttpEntity&lt;&gt;(body, headers);</span>
+<span class="nc" id="L50">            ResponseEntity&lt;String&gt; response = restTemplate.postForEntity(</span>
+                    aiServiceUrl + &quot;/recommend&quot;, request, String.class);
+<span class="nc" id="L52">            return response.getBody();</span>
+<span class="nc" id="L53">        } catch (Exception e) {</span>
+<span class="nc" id="L54">            System.err.println(&quot;AI Service /recommend failed: &quot; + e.getMessage());</span>
+<span class="nc" id="L55">            return null;</span>
+        }
+    }
+
+    // Call /generate-report endpoint
+    public String generateReport(String text) {
+        try {
+<span class="nc" id="L62">            HttpHeaders headers = new HttpHeaders();</span>
+<span class="nc" id="L63">            headers.setContentType(MediaType.APPLICATION_JSON);</span>
+<span class="nc" id="L64">            Map&lt;String, String&gt; body = Map.of(&quot;text&quot;, text);</span>
+<span class="nc" id="L65">            HttpEntity&lt;Map&lt;String, String&gt;&gt; request = new HttpEntity&lt;&gt;(body, headers);</span>
+<span class="nc" id="L66">            ResponseEntity&lt;String&gt; response = restTemplate.postForEntity(</span>
+                    aiServiceUrl + &quot;/generate-report&quot;, request, String.class);
+<span class="nc" id="L68">            return response.getBody();</span>
+<span class="nc" id="L69">        } catch (Exception e) {</span>
+<span class="nc" id="L70">            System.err.println(&quot;AI Service /generate-report failed: &quot; + e.getMessage());</span>
+<span class="nc" id="L71">            return null;</span>
+        }
+    }
+
+    // Call /health endpoint
+    public String health() {
+        try {
+<span class="nc" id="L78">            ResponseEntity&lt;String&gt; response = restTemplate.getForEntity(</span>
+                    aiServiceUrl + &quot;/health&quot;, String.class);
+<span class="nc" id="L80">            return response.getBody();</span>
+<span class="nc" id="L81">        } catch (Exception e) {</span>
+<span class="nc" id="L82">            System.err.println(&quot;AI Service /health failed: &quot; + e.getMessage());</span>
+<span class="nc" id="L83">            return null;</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RedisConfig.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Tool-05 Risk Heatmap Visualiser</a> &gt; <a href="index.source.html" class="el_package">com.internship.tool.config</a> &gt; <span class="el_source">RedisConfig.java</span></div><h1>RedisConfig.java</h1><pre class="source lang-java linenums">package com.internship.tool.config;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.cache.RedisCacheConfiguration;
+import org.springframework.data.redis.cache.RedisCacheManager;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.RedisSerializationContext;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
+
+import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
+
+@Configuration
+@EnableCaching
+<span class="nc" id="L24">public class RedisConfig {</span>
+
+    @Value(&quot;${spring.data.redis.host}&quot;)
+    private String redisHost;
+
+    @Value(&quot;${spring.data.redis.port}&quot;)
+    private int redisPort;
+
+    @Value(&quot;${spring.data.redis.password:}&quot;)
+    private String redisPassword;
+
+    @Bean
+    public LettuceConnectionFactory redisConnectionFactory() {
+<span class="nc" id="L37">        RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();</span>
+<span class="nc" id="L38">        config.setHostName(redisHost);</span>
+<span class="nc" id="L39">        config.setPort(redisPort);</span>
+<span class="nc bnc" id="L40" title="All 4 branches missed.">        if (redisPassword != null &amp;&amp; !redisPassword.isEmpty()) {</span>
+<span class="nc" id="L41">            config.setPassword(redisPassword);</span>
+        }
+<span class="nc" id="L43">        return new LettuceConnectionFactory(config);</span>
+    }
+
+    @Bean
+    public RedisTemplate&lt;String, Object&gt; redisTemplate(RedisConnectionFactory connectionFactory) {
+<span class="nc" id="L48">        RedisTemplate&lt;String, Object&gt; template = new RedisTemplate&lt;&gt;();</span>
+<span class="nc" id="L49">        template.setConnectionFactory(connectionFactory);</span>
+<span class="nc" id="L50">        template.setKeySerializer(new StringRedisSerializer());</span>
+<span class="nc" id="L51">        template.setValueSerializer(new GenericJackson2JsonRedisSerializer());</span>
+<span class="nc" id="L52">        template.setHashKeySerializer(new StringRedisSerializer());</span>
+<span class="nc" id="L53">        template.setHashValueSerializer(new GenericJackson2JsonRedisSerializer());</span>
+<span class="nc" id="L54">        template.afterPropertiesSet();</span>
+<span class="nc" id="L55">        return template;</span>
+    }
+
+    @Bean
+    public CacheManager cacheManager(RedisConnectionFactory connectionFactory) {
+<span class="nc" id="L60">        RedisCacheConfiguration defaultConfig = RedisCacheConfiguration.defaultCacheConfig()</span>
+<span class="nc" id="L61">                .entryTtl(Duration.ofMinutes(10))</span>
+<span class="nc" id="L62">                .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))</span>
+<span class="nc" id="L63">                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer()))</span>
+<span class="nc" id="L64">                .disableCachingNullValues();</span>
+
+<span class="nc" id="L66">        Map&lt;String, RedisCacheConfiguration&gt; cacheConfigurations = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L67">        cacheConfigurations.put(&quot;risks&quot;, defaultConfig.entryTtl(Duration.ofMinutes(10)));</span>
+<span class="nc" id="L68">        cacheConfigurations.put(&quot;stats&quot;, defaultConfig.entryTtl(Duration.ofMinutes(5)));</span>
+
+<span class="nc" id="L70">        return RedisCacheManager.builder(connectionFactory)</span>
+<span class="nc" id="L71">                .cacheDefaults(defaultConfig)</span>
+<span class="nc" id="L72">                .withInitialCacheConfigurations(cacheConfigurations)</span>
+<span class="nc" id="L73">                .build();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GlobalExceptionHandler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Tool-05 Risk Heatmap Visualiser</a> &gt; <a href="index.source.html" class="el_package">com.internship.tool.exception</a> &gt; <span class="el_source">GlobalExceptionHandler.java</span></div><h1>GlobalExceptionHandler.java</h1><pre class="source lang-java linenums">package com.internship.tool.exception;
+
+import java.util.Map;
+
+
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.stream.Collectors;
+
+@RestControllerAdvice
+<span class="nc" id="L20">@Slf4j</span>
+<span class="nc" id="L21">public class GlobalExceptionHandler {</span>
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleResourceNotFound(
+            ResourceNotFoundException ex, HttpServletRequest request) {
+<span class="nc" id="L26">        log.warn(&quot;Resource not found: {}&quot;, ex.getMessage());</span>
+<span class="nc" id="L27">        return ResponseEntity.status(HttpStatus.NOT_FOUND)</span>
+<span class="nc" id="L28">                .body(Map.of(&quot;code&quot;, &quot;NOT_FOUND&quot;, &quot;message&quot;, ex.getMessage(), &quot;path&quot;, request.getRequestURI()));</span>
+    }
+
+    @ExceptionHandler(ValidationException.class)
+    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleValidation(
+            ValidationException ex, HttpServletRequest request) {
+<span class="nc" id="L34">        log.warn(&quot;Validation error: {}&quot;, ex.getMessage());</span>
+<span class="nc" id="L35">        return ResponseEntity.status(HttpStatus.BAD_REQUEST)</span>
+<span class="nc" id="L36">                .body(Map.of(&quot;code&quot;, &quot;BAD_REQUEST&quot;, &quot;message&quot;, ex.getMessage(), &quot;path&quot;, request.getRequestURI()));</span>
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleMethodArgumentNotValid(
+            MethodArgumentNotValidException ex, HttpServletRequest request) {
+<span class="nc" id="L42">        String message = ex.getBindingResult().getFieldErrors().stream()</span>
+<span class="nc" id="L43">                .map(FieldError::getDefaultMessage)</span>
+<span class="nc" id="L44">                .collect(Collectors.joining(&quot;, &quot;));</span>
+<span class="nc" id="L45">        log.warn(&quot;Validation error: {}&quot;, message);</span>
+<span class="nc" id="L46">        return ResponseEntity.status(HttpStatus.BAD_REQUEST)</span>
+<span class="nc" id="L47">                .body(Map.of(&quot;code&quot;, &quot;VALIDATION_ERROR&quot;, &quot;message&quot;, message, &quot;path&quot;, request.getRequestURI()));</span>
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleBadCredentials(
+            BadCredentialsException ex, HttpServletRequest request) {
+<span class="nc" id="L53">        log.warn(&quot;Bad credentials: {}&quot;, ex.getMessage());</span>
+<span class="nc" id="L54">        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)</span>
+<span class="nc" id="L55">                .body(Map.of(&quot;code&quot;, &quot;UNAUTHORIZED&quot;, &quot;message&quot;, &quot;Invalid email or password&quot;, &quot;path&quot;, request.getRequestURI()));</span>
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleAccessDenied(
+            AccessDeniedException ex, HttpServletRequest request) {
+<span class="nc" id="L61">        log.warn(&quot;Access denied: {}&quot;, ex.getMessage());</span>
+<span class="nc" id="L62">        return ResponseEntity.status(HttpStatus.FORBIDDEN)</span>
+<span class="nc" id="L63">                .body(Map.of(&quot;code&quot;, &quot;FORBIDDEN&quot;, &quot;message&quot;, &quot;You don't have permission to access this resource&quot;, &quot;path&quot;, request.getRequestURI()));</span>
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleGenericException(
+            Exception ex, HttpServletRequest request) {
+<span class="nc" id="L69">        log.error(&quot;Unexpected error: &quot;, ex);</span>
+<span class="nc" id="L70">        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)</span>
+<span class="nc" id="L71">                .body(Map.of(&quot;code&quot;, &quot;INTERNAL_SERVER_ERROR&quot;, &quot;message&quot;, &quot;An unexpected error occurred&quot;, &quot;path&quot;, request.getRequestURI()));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

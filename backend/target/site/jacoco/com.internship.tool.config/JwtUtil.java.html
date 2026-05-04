@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JwtUtil.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Tool-05 Risk Heatmap Visualiser</a> &gt; <a href="index.source.html" class="el_package">com.internship.tool.config</a> &gt; <span class="el_source">JwtUtil.java</span></div><h1>JwtUtil.java</h1><pre class="source lang-java linenums">package com.internship.tool.config;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
+import java.util.Base64;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
+
+@Component
+<span class="nc" id="L20">public class JwtUtil {</span>
+
+    private static final String INSECURE_SECRET_PREFIX = &quot;mySuperSecretKey&quot;;
+
+    @Value(&quot;${app.jwt.secret}&quot;)
+    private String secret;
+
+    @Value(&quot;${app.jwt.expiration-ms}&quot;)
+    private Long expiration;
+
+    private SecretKey signingKey;
+
+    @PostConstruct
+    public void init() {
+<span class="nc bnc" id="L34" title="All 4 branches missed.">        if (secret == null || secret.startsWith(INSECURE_SECRET_PREFIX)) {</span>
+<span class="nc" id="L35">            this.secret = generateSecureSecret();</span>
+        }
+<span class="nc" id="L37">        this.signingKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));</span>
+<span class="nc" id="L38">    }</span>
+
+    private String generateSecureSecret() {
+<span class="nc" id="L41">        SecureRandom random = new SecureRandom();</span>
+<span class="nc" id="L42">        byte[] bytes = new byte[32];</span>
+<span class="nc" id="L43">        random.nextBytes(bytes);</span>
+<span class="nc" id="L44">        return Base64.getEncoder().encodeToString(bytes);</span>
+    }
+
+    private SecretKey getSigningKey() {
+<span class="nc" id="L48">        return signingKey;</span>
+    }
+
+    public String extractEmail(String token) {
+<span class="nc" id="L52">        return extractClaim(token, Claims::getSubject);</span>
+    }
+
+    public String extractRole(String token) {
+<span class="nc" id="L56">        return extractClaim(token, claims -&gt; claims.get(&quot;role&quot;, String.class));</span>
+    }
+
+    public Long extractUserId(String token) {
+<span class="nc" id="L60">        return extractClaim(token, claims -&gt; claims.get(&quot;userId&quot;, Long.class));</span>
+    }
+
+    public Date extractExpiration(String token) {
+<span class="nc" id="L64">        return extractClaim(token, Claims::getExpiration);</span>
+    }
+
+    public &lt;T&gt; T extractClaim(String token, Function&lt;Claims, T&gt; claimsResolver) {
+<span class="nc" id="L68">        final Claims claims = extractAllClaims(token);</span>
+<span class="nc" id="L69">        return claimsResolver.apply(claims);</span>
+    }
+
+    private Claims extractAllClaims(String token) {
+<span class="nc" id="L73">        return Jwts.parser()</span>
+<span class="nc" id="L74">                .verifyWith(getSigningKey())</span>
+<span class="nc" id="L75">                .build()</span>
+<span class="nc" id="L76">                .parseSignedClaims(token)</span>
+<span class="nc" id="L77">                .getPayload();</span>
+    }
+
+    private Boolean isTokenExpired(String token) {
+<span class="nc" id="L81">        return extractExpiration(token).before(new Date());</span>
+    }
+
+    public String generateToken(String email, String role, Long userId) {
+<span class="nc" id="L85">        Map&lt;String, Object&gt; claims = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L86">        claims.put(&quot;role&quot;, role);</span>
+<span class="nc" id="L87">        claims.put(&quot;userId&quot;, userId);</span>
+<span class="nc" id="L88">        return createToken(claims, email);</span>
+    }
+
+    private String createToken(Map&lt;String, Object&gt; claims, String subject) {
+<span class="nc" id="L92">        return Jwts.builder()</span>
+<span class="nc" id="L93">                .claims(claims)</span>
+<span class="nc" id="L94">                .subject(subject)</span>
+<span class="nc" id="L95">                .issuedAt(new Date(System.currentTimeMillis()))</span>
+<span class="nc" id="L96">                .expiration(new Date(System.currentTimeMillis() + expiration))</span>
+<span class="nc" id="L97">                .signWith(getSigningKey())</span>
+<span class="nc" id="L98">                .compact();</span>
+    }
+
+    public Boolean validateToken(String token, String email) {
+<span class="nc" id="L102">        final String extractedEmail = extractEmail(token);</span>
+<span class="nc bnc" id="L103" title="All 4 branches missed.">        return (extractedEmail.equals(email) &amp;&amp; !isTokenExpired(token));</span>
+    }
+
+    public Boolean validateToken(String token) {
+        try {
+<span class="nc" id="L108">            extractAllClaims(token);</span>
+<span class="nc bnc" id="L109" title="All 2 branches missed.">            return !isTokenExpired(token);</span>
+<span class="nc" id="L110">        } catch (Exception e) {</span>
+<span class="nc" id="L111">            return false;</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

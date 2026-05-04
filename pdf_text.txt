@@ -1,0 +1,1089 @@
+Tool-05 — Risk Heatmap Visualiser  |  Page 1
+ Capstone Project
+ 
+Tool-05 — Risk Heatmap Visualiser
+ MVP Tool | Team: Team: 8 Members
+ 
+ Sprint: Monday 14 April 2026 — Friday 9 May 2026 | Demo Day: 9 May 2026
+ 
+[!] READ THIS DOCUMENT COMPLETELY BEFORE WRITING A SINGLE LINE OF CODE. This is your
+complete project guide — what to build, the full tech stack, exact folder structure, every task broken down day
+by day, GitHub submission steps, Demo Day checklist, and the 8 most common mistakes. Read it twice.
+1. PROJECT OVERVIEW
+You are building Tool-05 — Risk Heatmap Visualiser as your internship capstone project. This is a real-world,
+AI-powered web application built using an industry-standard tech stack. It will be the strongest item on your resume
+when you graduate.
+Tool ID
+Tool-05
+Tool Name
+Risk Heatmap Visualiser
+Tool Type
+MVP — Large Tool (full feature set)
+Team
+Team: 8 Members
+Sprint
+Monday 14 April – Friday 9 May 2026 (20 working days)
+Demo Day
+Friday 9 May 2026 — 8-minute live presentation
+Backend Port
+8080 | Swagger: http://localhost:8080/swagger-ui.html
+AI Port
+5000 | Health: http://localhost:5000/health
+Frontend Port
+80 | Access: http://localhost
+Repository
+Link will be shared by your mentor before Day 1
+Tool-05 — Risk Heatmap Visualiser  |  Page 2
+2. TECH STACK
+Use this exact stack. Do not change it. Before Day 2 read the getting-started docs for any technology you are
+unfamiliar with: spring.io/guides, console.groq.com/docs, docs.trychroma.com, react.dev, tailwindcss.com,
+docs.docker.com/compose.
+ Technology
+ What It Does in This Project
+ 
+Java 17
+Backend language. Download from adoptium.net
+Spring Boot 3.x
+Java framework — REST APIs, security, scheduling, email
+PostgreSQL 15
+Primary database. Run inside Docker
+Redis 7
+In-memory cache and AI response cache (15 min TTL)
+Flyway
+DB migrations — every schema change in a numbered SQL file
+Spring Security + JWT
+Login and ADMIN/MANAGER/VIEWER role-based access control
+JavaMailSender
+HTML email notifications for key business events
+Swagger / OpenAPI 3.0
+API docs auto-generated at /swagger-ui.html
+Python 3.11
+AI service language
+Flask 3.x
+Python web framework — AI microservice on port 5000
+Groq API (LLaMA-3.3-70b)
+AI model — free tier at console.groq.com, no credit card
+ChromaDB
+Vector database for the RAG pipeline
+sentence-transformers
+Converts text to vectors for ChromaDB
+flask-limiter
+Rate limiting — blocks IPs exceeding 30 req/min
+React 18 + Vite
+Frontend framework with fast build tool
+Tailwind CSS
+Utility CSS — style with class names
+Axios
+HTTP client for React to call the Java backend
+Recharts
+React chart library for analytics dashboard
+Docker + Docker Compose
+Runs all 5 services with one command: docker-compose up
+Tool-05 — Risk Heatmap Visualiser  |  Page 3
+3. FOLDER STRUCTURE — Create This on Day 1
+Create all folders on Day 1 before writing any code. Use this exact layout throughout the sprint.
+your-project-folder/
+|-- backend/ <- Spring Boot project
+| |-- src/main/java/com/internship/tool/
+| | |-- controller/ <- REST endpoints (@RestController)
+| | |-- service/ <- Business logic (@Service)
+| | |-- repository/ <- DB queries (JpaRepository)
+| | |-- entity/ <- JPA table models (@Entity)
+| | |-- dto/ <- Request and Response POJOs
+| | |-- config/ <- Security, Redis, Mail, Async
+| | |-- exception/ <- Custom exceptions + @ControllerAdvice
+| | +-- scheduler/ <- @Scheduled reminder jobs
+| |-- src/main/resources/
+| | |-- db/migration/ <- V1__init.sql, V2__audit.sql ...
+| | |-- templates/ <- Thymeleaf HTML email templates
+| | +-- application.yml <- All config (env variable references)
+| +-- pom.xml
+|
+|-- ai-service/ <- Flask Python microservice
+| |-- routes/ <- describe.py, recommend.py ...
+| |-- services/ <- groq_client.py, chroma_client.py
+| |-- prompts/ <- prompt template text files
+| |-- app.py <- Flask entry point
+| |-- Dockerfile
+| +-- requirements.txt
+|
+|-- frontend/ <- React + Vite frontend
+| |-- src/
+| | |-- components/ <- Reusable UI components
+| | |-- pages/ <- List, Detail, Form, Login, Dashboard
+| | |-- services/ <- Axios API call functions
+| | +-- App.jsx <- Root component + routing
+| +-- package.json
+|
+|-- docker-compose.yml <- Runs all 5 services together
+|-- .env.example <- All required environment variables
++-- README.md
+Tool-05 — Risk Heatmap Visualiser  |  Page 4
+4. TEAM ROLES
+Your mentor will coordinate teams and guide progress. Each role below has a clear set of responsibilities for the
+full sprint.
+ Role
+ Responsibilities
+ 
+Java Developer 1
+Spring Boot setup, Service layer, JWT auth, data seeder, README.md, opens Demo Day.
+Java Developer 2
+DB schema (Flyway), Repository layer, audit logging, email notifications, Docker Compose,
+performance.
+Java Developer 3
+Full React frontend — all pages, responsive design, AI panel, demo video recording.
+AI Developer 1
+Flask setup, primary prompts, /describe and /recommend endpoints, ChromaDB RAG
+pipeline.
+AI Developer 2
+GroqClient, /categorise and /generate-report, prompt tuning, AI response caching, AI docs.
+AI Developer 3
+Input sanitisation, rate limiting, AiServiceClient.java, OWASP ZAP testing, SECURITY.md.
+Security Reviewer
+Independent security testing each Friday, validates fixes, presents security on Demo Day.
+Your Team
+Member
+ Role
+ Contact
+ 
+Member 1
+Role will be confirmed by your mentor before Day 1
+Contact your mentor for team WhatsApp
+group details
+Member 2
+Role will be confirmed by your mentor before Day 1
+Contact your mentor for team WhatsApp
+group details
+Member 3
+Role will be confirmed by your mentor before Day 1
+Contact your mentor for team WhatsApp
+group details
+Member 4
+Role will be confirmed by your mentor before Day 1
+Contact your mentor for team WhatsApp
+group details
+Member 5
+Role will be confirmed by your mentor before Day 1
+Contact your mentor for team WhatsApp
+group details
+Member 6
+Role will be confirmed by your mentor before Day 1
+Contact your mentor for team WhatsApp
+group details
+Member 7
+Role will be confirmed by your mentor before Day 1
+Contact your mentor for team WhatsApp
+group details
+Member 8
+Role will be confirmed by your mentor before Day 1
+Contact your mentor for team WhatsApp
+group details
+Tool-05 — Risk Heatmap Visualiser  |  Page 5
+5. DAY-BY-DAY TASK BREAKDOWN (20 Working Days)
+Each row is one task for one role on one specific day. Complete it fully before end of that working day. If blocked,
+tell your team immediately — do not stay stuck silently. Update your status daily: Not Started → In Progress →
+Completed → Blocked
+[YEL] Week 1:
+Foundation
+[ORN] Week 2: Core
+Features
+[BLU] Week 3: Polish
+[GRN] Week 4: Demo
+Prep
+[PUR] Day 20: Demo
+Day
+Day
+Date
+Track
+Role
+ Task — Complete This Fully Today
+ Status
+Day 1
+Mon Apr
+14
+— Week 1 —
+Java
+Java Developer 1
+Setup Spring Boot — folder structure, pom.xml with all
+dependencies, application.yml using ${ENV_VAR}
+placeholders for DB, Redis, mail, JWT
+Not Started
+Java
+Java Developer 2
+Write Flyway V1 migration — create core table with all
+required columns, correct data types, indexes on key lookup
+fields
+Not Started
+Java
+Java Developer 3
+Setup React with Vite — install Axios and Tailwind CSS, set
+VITE_API_URL in .env, create pages/, components/,
+services/ folders
+Not Started
+AI
+AI Developer 1
+Setup Flask — create routes/, services/, prompts/ folders,
+write requirements.txt, write app.py entry point registering all
+blueprints
+Not Started
+AI
+AI Developer 2
+Get Groq API key at console.groq.com, store in .env as
+GROQ_API_KEY, write test_groq.py to confirm the API call
+works
+Not Started
+AI
+AI Developer 3
+Read tool spec fully. Create SECURITY.md — document 5
+OWASP Top 10 risks with attack scenario and mitigation for
+each
+Not Started
+Day 2
+Tue Apr
+15
+— Week 1 —
+Java
+Java Developer 1
+Create JPA Entity — all fields with @Column,
+@CreatedDate/@LastModifiedDate,
+@EntityListeners(AuditingEntityListener.class)
+Not Started
+Java
+Java Developer 2
+Create JPA Repository — extend JpaRepository, add
+custom @Query methods for search, filter by status, find by
+date range
+Not Started
+Java
+Java Developer 3
+Build list view page — table with all columns, Axios GET on
+mount, loading skeleton while fetching, empty state message
+Not Started
+AI
+AI Developer 1
+Write primary prompt template for /describe — test with 5
+real inputs, refine until outputs are consistently professional
+Not Started
+AI
+AI Developer 2
+Implement GroqClient — API call, JSON parsing, 3-retry with
+backoff, error logging. Save as services/groq_client.py
+Not Started
+AI
+AI Developer 3
+Document 5 security threats specific to this tool in
+SECURITY.md — attack vector, damage potential,
+mitigation plan for each
+Not Started
+Tool-05 — Risk Heatmap Visualiser  |  Page 6
+Day 3
+Wed Apr
+16
+— Week 1 —
+Java
+Java Developer 1
+Implement Service layer — all business logic, input
+validation, custom exception classes for each error type
+Not Started
+Java
+Java Developer 2
+Write Flyway V2 — create audit_log table, composite index
+on (entity_type, entity_id), additional indexes on key query
+columns
+Not Started
+Java
+Java Developer 3
+Build create/edit form — controlled inputs for all fields,
+client-side validation with inline error messages, submit
+handler
+Not Started
+AI
+AI Developer 1
+Build POST /describe — validate input, load prompt
+template, call Groq, return structured JSON with
+generated_at timestamp
+Not Started
+AI
+AI Developer 2
+Build POST /categorise — classify input into predefined
+categories, return {category, confidence: 0.0-1.0, reasoning}
+Not Started
+AI
+AI Developer 3
+Implement input sanitisation middleware — strip HTML,
+detect prompt injection patterns, return 400 with clear error
+message
+Not Started
+Day 4
+Thu Apr
+17
+— Week 1 —
+Java
+Java Developer 1
+Build REST Controller — GET /all paginated, GET /{id} with
+404, POST /create with @Valid, all correct HTTP status
+codes
+Not Started
+Java
+Java Developer 2
+Build REST Controller — PUT /{id}, DELETE (soft delete),
+GET /search?q=, GET /stats for dashboard KPIs
+Not Started
+Java
+Java Developer 3
+Connect list page to GET /all API — handle Spring Page
+response, implement pagination controls, sort by column
+headers
+Not Started
+AI
+AI Developer 1
+Build POST /recommend — return 3 actionable
+recommendations as JSON array, each with action_type,
+description, priority
+Not Started
+AI
+AI Developer 2
+Setup ChromaDB — init persistent collection, write test
+verifying embed + query returns correct result
+Not Started
+AI
+AI Developer 3
+Add flask-limiter — 30 req/min default, 10 req/min on
+/generate-report, return 429 with retry_after on breach
+Not Started
+Day 5
+Fri Apr
+18
+— Week 1 —
+Java
+Java Developer 1
+Implement JWT auth — JwtUtil (generate/validate/extract),
+JwtAuthFilter, SecurityConfig (permit /auth/**, require all
+others)
+Not Started
+Java
+Java Developer 2
+Build AuthController — POST /login (validate, return JWT),
+POST /register (hash password, VIEWER role), POST
+/refresh
+Not Started
+Java
+Java Developer 3
+Build login page — form, store JWT, AuthContext with
+isAuthenticated, ProtectedRoute redirects if not logged in
+Not Started
+AI
+AI Developer 1
+Build RAG pipeline — load docs, chunk (500 chars, 50
+overlap), embed with sentence-transformers, store all in
+ChromaDB
+Not Started
+Tool-05 — Risk Heatmap Visualiser  |  Page 7
+AI
+AI Developer 2
+Build POST /query — embed question, retrieve top-3
+ChromaDB chunks, inject as context, call Groq, return
+answer + sources
+Not Started
+AI
+AI Developer 3
+Week 1 security test — test all endpoints for empty input,
+SQL injection patterns, prompt injection. Document pass/fail
+in SECURITY.md
+Not Started
+Day 6
+Mon Apr
+21
+— Week 2 —
+Java
+Java Developer 1
+Add Redis caching — @Cacheable on GETs with 10 min
+TTL, @CacheEvict on all writes. Test cache hit vs miss
+timing
+Not Started
+Java
+Java Developer 2
+Implement RBAC — ADMIN/MANAGER/VIEWER roles,
+@PreAuthorize on endpoints, seed roles via Flyway V3
+migration
+Not Started
+Java
+Java Developer 3
+Build dashboard — 4 KPI cards from GET /stats, Recharts
+BarChart showing data by category or status
+Not Started
+AI
+AI Developer 1
+Build POST /generate-report — produce {title,
+executive_summary, overview, top_items,
+recommendations} as JSON
+Not Started
+AI
+AI Developer 2
+Prompt tuning — run all prompts against 10 real inputs,
+score accuracy and format, rewrite any below 7/10
+Not Started
+AI
+AI Developer 3
+Write AiServiceClient.java — RestTemplate calls to all Flask
+endpoints, 10s timeout, graceful null return on error
+Not Started
+Day 7
+Tue Apr
+22
+— Week 2 —
+Java
+Java Developer 1
+Email notifications — JavaMailSender, Thymeleaf HTML
+templates, send on create and overdue events
+Not Started
+Java
+Java Developer 2
+@Scheduled cron jobs — daily reminder for overdue items,
+7-day advance deadline alert, weekly summary
+Not Started
+Java
+Java Developer 3
+Detail page — all fields, colour-coded score/status badge,
+Edit/Delete buttons, AI Analysis card section
+Not Started
+AI
+AI Developer 1
+Integrate AiServiceClient into Service — call AI on create
+@Async, attach result to entity, handle null gracefully
+Not Started
+AI
+AI Developer 2
+Build GET /health — model name, avg response time (last
+10), ChromaDB doc count, uptime, cache stats
+Not Started
+AI
+AI Developer 3
+Run OWASP ZAP baseline scan — export report, categorise
+findings by severity, plan remediation for all Medium+
+Not Started
+Day 8
+Wed Apr
+23
+— Week 2 —
+Java
+Java Developer 1
+@ControllerAdvice — catch ResourceNotFoundException
+(404), ValidationException (400), generic Exception (500),
+consistent JSON body
+Not Started
+Java
+Java Developer 2
+Audit logging via Spring AOP — @Around on service CUD
+methods, save old/new JSON to audit_log table
+Not Started
+Java
+Java Developer 3
+AI panel in UI — 'Ask AI' button, loading spinner, formatted
+AI response card, Retry on error
+Not Started
+Tool-05 — Risk Heatmap Visualiser  |  Page 8
+AI
+AI Developer 1
+Add SSE streaming to /generate-report — stream tokens to
+frontend, React reads with EventSource
+Not Started
+AI
+AI Developer 2
+Redis AI cache — SHA256 cache key, 15 min TTL,
+increment hit/miss counters, skip cache for fresh requests
+Not Started
+AI
+AI Developer 3
+Fix all ZAP findings — add security headers
+(X-Content-Type-Options, X-Frame-Options), re-scan to
+confirm resolved
+Not Started
+Day 9
+Thu Apr
+24
+— Week 2 —
+Java
+Java Developer 1
+File attachments — POST /upload, GET /files/{id}, validate
+type and size (< 10 MB), store with UUID filename
+Not Started
+Java
+Java Developer 2
+Add pagination params to all list endpoints — page, size,
+sortBy, sortDir. Add GET /export CSV endpoint
+Not Started
+Java
+Java Developer 3
+Search and filter bar — debounced 300ms text search,
+status dropdown, date range picker, URL query params
+Not Started
+AI
+AI Developer 1
+Build POST /analyse-document — accept text, identify key
+insights and risks, return structured findings array
+Not Started
+AI
+AI Developer 2
+Add meta object to all responses — {confidence: 0.0-1.0,
+model_used, tokens_used, response_time_ms, cached:
+bool}
+Not Started
+AI
+AI Developer 3
+PII audit — verify no personal data in prompts or logs.
+Document findings in SECURITY.md
+Not Started
+Day
+10
+Fri Apr
+25
+— Week 2 —
+Java
+Java Developer 1
+Write 10 JUnit 5 unit tests for Service — Mockito mocks,
+happy path and error cases for every public method
+Not Started
+Java
+Java Developer 2
+Write MockMvc integration tests — test every endpoint for
+correct HTTP status codes and response body structure
+Not Started
+Java
+Java Developer 3
+React export — CSV download button, streaming report
+display using EventSource, analytics page with Recharts
+Not Started
+AI
+AI Developer 1
+Write 10 pytest unit tests — mock Groq responses, test each
+endpoint for format, error handling, edge cases
+Not Started
+AI
+AI Developer 2
+Week 2 AI quality review — 10 fresh inputs per endpoint,
+score accuracy (target avg >= 4/5), rewrite failing prompts
+Not Started
+AI
+AI Developer 3
+Week 2 security sign-off — JWT enforcement, rate limiting,
+injection rejection all verified. Sign off in SECURITY.md
+Not Started
+Day
+11
+Mon Apr
+28
+— Week 3 —
+Java
+Java Developer 1
+Additional tests to reach 80% coverage — @DataJpaTest
+for Repository, AuthController, JwtUtil, AuditService
+Not Started
+Java
+Java Developer 2
+@SpringBootTest integration test — full CRUD flow with
+Testcontainers (real PostgreSQL + Redis containers)
+Not Started
+Java
+Java Developer 3
+Analytics page — BarChart by category, LineChart over time
+(6 months), PieChart by status, period selector
+Not Started
+AI
+AI Developer 1
+Build POST /batch-process — accept up to 20 items,
+process each with 100ms delay, return results array
+Not Started
+Tool-05 — Risk Heatmap Visualiser  |  Page 9
+AI
+AI Developer 2
+Async job processing for /generate-report — return job_id
+immediately, background thread, webhook on complete
+Not Started
+AI
+AI Developer 3
+Full OWASP ZAP active scan — fix all Critical and High
+findings today, document Medium as accepted or planned
+Not Started
+Day
+12
+Tue Apr
+29
+— Week 3 —
+Java
+Java Developer 1
+Swagger/OpenAPI — @Operation and @ApiResponse on
+every controller method, document all DTOs with examples
+Not Started
+Java
+Java Developer 2
+docker-compose.yml — all 5 services with healthchecks,
+depends_on, env from .env, test with docker-compose up
+--build
+Not Started
+Java
+Java Developer 3
+UX polish — loading skeletons, empty state illustrations,
+React Error Boundary on all pages
+Not Started
+AI
+AI Developer 1
+Write ai-service/README.md — prerequisites, setup steps,
+env vars, run instructions, full endpoint API reference
+Not Started
+AI
+AI Developer 2
+Performance benchmark — p50/p95/p99 for all endpoints,
+50 requests each. Optimise any endpoint exceeding target
+Not Started
+AI
+AI Developer 3
+Fix all remaining ZAP findings — flask-talisman for security
+headers, re-scan confirms zero Critical/High remaining
+Not Started
+Day
+13
+Wed Apr
+30
+— Week 3 —
+Java
+Java Developer 1
+Full system test — docker-compose down -v then up --build,
+walk every feature end-to-end, document all bugs
+Not Started
+Java
+Java Developer 2
+Fix all bugs from system test — P1 crashes and P2 wrong
+data fixed today, zero P1/P2 allowed after Day 13
+Not Started
+Java
+Java Developer 3
+Responsive design — test 375px / 768px / 1280px, fix all
+layout breakages with Tailwind responsive prefixes
+Not Started
+AI
+AI Developer 1
+Optimise slow endpoints — pre-load sentence-transformers
+model at startup, reduce prompt length, verify Redis cache
+Not Started
+AI
+AI Developer 2
+AI fallback — on Groq timeout/error, return pre-written
+template response with {is_fallback: true} in meta
+Not Started
+AI
+AI Developer 3
+Full stack security test — 401 without token, 403 wrong role,
+XSS in input field, 429 after rate limit, all verified
+Not Started
+Day
+14
+Thu May
+1
+— Week 3 —
+Java
+Java Developer 1
+Data seeder — DataLoader seeds 30 realistic demo records
+on startup, covering all statuses and score ranges
+Not Started
+Java
+Java Developer 2
+Performance — EXPLAIN ANALYZE slow queries, add
+missing indexes, fix N+1 with @EntityGraph or JOIN FETCH
+Not Started
+Java
+Java Developer 3
+UI brand polish — consistent primary colour (#1B4F8A),
+Arial font, 8px grid spacing, 44px min touch targets
+Not Started
+AI
+AI Developer 1
+Seed ChromaDB — ingest 10 domain knowledge documents
+covering key topics relevant to this tool
+Not Started
+AI
+AI Developer 2
+Final prompt QA — run all prompts against 30 seeded demo
+records, verify all outputs are demo-ready
+Not Started
+Tool-05 — Risk Heatmap Visualiser  |  Page 10
+AI
+AI Developer 3
+Final SECURITY.md — executive summary, all threats, tests
+conducted, findings fixed, residual risks, team sign-off
+Not Started
+Day
+15
+Fri May 2
+— Week 3 —
+Java
+Java Developer 1
+Team code review — all PRs reviewed, no hardcoded
+secrets, no TODO comments, coding standards enforced
+Not Started
+Java
+Java Developer 2
+Final merge — clean history, docker-compose up --build
+passes, all tests pass, tag release/v1.0
+Not Started
+Java
+Java Developer 3
+Record 2-min demo video — screen record with voice
+narrating every key feature, save as demo_video.mp4
+Not Started
+AI
+AI Developer 1
+Final AI QA — all 6 endpoints tested with demo data, every
+output professional and demo-ready
+Not Started
+AI
+AI Developer 2
+Package AI — Dockerfile builds and runs cleanly,
+requirements.txt exact versions, .env.example complete
+Not Started
+AI
+AI Developer 3
+Final security checklist — tick every item, all 6 members sign
+off, commit SECURITY.md final version
+Not Started
+Day
+16
+Mon May
+5
+— Week 4 —
+Java
+Java Developer 1
+Write README.md — overview, ASCII architecture diagram,
+prerequisites, setup steps, .env.example reference table
+Not Started
+Java
+Java Developer 2
+Final bug fix — zero P1/P2 bugs after today, P3 documented
+as known issues in README
+Not Started
+Java
+Java Developer 3
+Prepare 5 demo scenarios — exact steps and expected
+output for each, walk through on live system and confirm
+Not Started
+AI
+AI Developer 1
+Write AI demo script — exact inputs, expected outputs, and
+what to say for each AI interaction in the 8-min demo
+Not Started
+AI
+AI Developer 2
+Final performance verify — all endpoints within targets,
+Redis cache confirmed working, fallback confirmed working
+Not Started
+AI
+AI Developer 3
+Prepare security talking points — 4 bullet points covering
+JWT, rate limiting, input sanitisation, ZAP results
+Not Started
+Day
+17
+Tue May
+6
+— Week 4 —
+Java
+Java Developer 1
+Demo Rehearsal 1 — full team, stopwatch, complete 8-min
+presentation, note all issues to fix
+Not Started
+Java
+Java Developer 2
+Fix all rehearsal issues — data, transitions, bugs. Re-test
+every scenario after fixes
+Not Started
+Java
+Java Developer 3
+Prepare 3 slides — Slide 1: problem, Slide 2: architecture,
+Slide 3: demo flow. Keep slides to 1 min total
+Not Started
+AI
+AI Developer 1
+AI dry run on demo machine — all 6 endpoints live with Groq
+API, record all response times
+Not Started
+AI
+AI Developer 2
+Backup deck — screenshot every AI output from dry run in
+case Groq API fails during live demo
+Not Started
+AI
+AI Developer 3
+Individual practice — each member presents their section
+solo without notes, identify and fix gaps
+Not Started
+Tool-05 — Risk Heatmap Visualiser  |  Page 11
+Day
+18
+Wed May
+7
+— Week 4 —
+Java
+Java Developer 1
+Submit GitHub — public, no secrets, one commit per day
+since Day 1, share link with mentor
+Not Started
+Java
+Java Developer 2
+Fresh machine test — clone repo, create .env,
+docker-compose up --build, full stack healthy in under 3 min
+Not Started
+Java
+Java Developer 3
+5 portfolio screenshots at 1920x1080 — dashboard, detail,
+AI panel, analytics, report streaming
+Not Started
+AI
+AI Developer 1
+Submit AI service GitHub link — Dockerfile builds cleanly,
+README complete, share link with mentor
+Not Started
+AI
+AI Developer 2
+Create 1-page AI summary card — 6 endpoints, tech stack,
+GitHub link. Print 2 copies for Demo Day
+Not Started
+AI
+AI Developer 3
+Submit final SECURITY.md — professional, complete,
+accurate. Print 1 copy for Demo Day
+Not Started
+Day
+19
+Thu May
+8
+— Week 4 —
+Java
+Java Developer 1
+Rehearsal 2 — full team, live system, 8 min target. Every
+member answers 5 key questions without notes
+Not Started
+Java
+Java Developer 2
+Final hotfix window — P1/P2 fixes only, no new features,
+re-test after each fix
+Not Started
+Java
+Java Developer 3
+docker-compose down -v then up — fresh seeded state, all
+30 records visible, all 5 scenarios confirmed
+Not Started
+AI
+AI Developer 1
+Groq API check — key active, credits sufficient, test call to
+all 6 endpoints confirmed working
+Not Started
+AI
+AI Developer 2
+Print AI talking points card — Groq, RAG, ChromaDB,
+prompt engineering each in 2 plain-English sentences
+Not Started
+AI
+AI Developer 3
+Final confidence check — every member presents their
+90-sec section solo, resolve any remaining uncertainty
+Not Started
+Day
+20
+Fri May 9
+— Demo —
+Java
+Java Developer 1
+DEMO — Open: problem statement (1 sentence),
+architecture slide, launch live tool. Create record, watch AI
+respond
+Not Started
+Java
+Java Developer 2
+DEMO — Show audit log, email notification, update status,
+demonstrate search and filter, CSV export
+Not Started
+Java
+Java Developer 3
+DEMO — Dashboard KPIs, analytics charts, responsive
+design on mobile window, final UI walkthrough
+Not Started
+AI
+AI Developer 1
+DEMO — AI Recommend (read aloud), Generate Report
+(show streaming), RAG query. Explain what AI is doing
+Not Started
+AI
+AI Developer 2
+DEMO — Explain stack: Flask + Groq + ChromaDB RAG in
+60 seconds, show /health endpoint response
+Not Started
+AI
+AI Developer 3
+DEMO — Security: 401 without token, 400 on injection
+attempt, reference SECURITY.md, state findings fixed
+Not Started
+Tool-05 — Risk Heatmap Visualiser  |  Page 12
+6. GITHUB — Push Code Every Working Day
+Push your code at the end of every working day. Your mentor will share the repository details before Day 1.
+Ste
+p
+Action
+ Instructions
+ 
+1
+Create Account
+Go to github.com, click Sign Up. Use your personal email. Choose a professional
+username.
+2
+Create Repository
+Your mentor will share the exact repository name and URL. Set Visibility to Public. Add
+README.
+3
+Install Git
+Download from git-scm.com. In terminal run: git --version to confirm version 2.x or higher.
+4
+Configure Git
+Run: git config --global user.name 'Your Name' and git config --global user.email
+'you@email.com'
+5
+Clone Repo
+Run: git clone [repository URL shared by mentor] then cd into the project folder
+6
+Add .gitignore
+On Day 1, before any commit: create .gitignore and add: .env target/ node_modules/
+__pycache__/ chroma_data/
+7
+Daily Push
+End of every working day: git add . then git commit -m 'Day X — what you did' then git
+push origin main
+8
+Verify Online
+After every push: open the repository URL in your browser and confirm the latest files are
+visible.
+Commit message format every day: Day X — brief description of what you completed
+Example: Day 3 — Implemented Service layer with validation and custom exceptions
+Tool-05 — Risk Heatmap Visualiser  |  Page 13
+7. DEMO DAY CHECKLIST
+Every item must be complete before your 8-minute Demo Day presentation on 9 May 2026.
+Deliverable
+ What Must Be Submitted or Demonstrated
+ Done?
+GitHub Repo
+Public repo (link from mentor). At least 1 commit per working day. No secrets
+committed.
+[ ]
+README.md
+Complete setup instructions. ASCII architecture diagram. Prerequisites.
+Step-by-step setup.
+[ ]
+docker-compose
+All services defined. Full stack starts with docker-compose up. Tested on a clean
+machine.
+[ ]
+Flyway
+All schema changes in numbered files (V1__, V2__, ...). No manual SQL outside
+migrations.
+[ ]
+JUnit Tests
+Minimum 10 tests, all passing. JaCoCo coverage >= 80%.
+[ ]
+Pytest Tests
+Minimum 8 tests, all passing. Groq API mocked — tests run without live network
+access.
+[ ]
+Swagger UI
+All endpoints documented at /swagger-ui.html with request/response examples.
+[ ]
+AI Service
+Flask app with working endpoints. Dockerfile builds. README covers setup.
+[ ]
+SECURITY.md
+Threat model, tests conducted, findings fixed, residual risks, team sign-off.
+[ ]
+Demo Data
+30 realistic seeded records on docker-compose up, covering all statuses and
+ranges.
+[ ]
+Demo Video
+demo_video.mp4: 90-120 seconds, all key features shown with clear voice
+narration.
+[ ]
+Tool-05 — Risk Heatmap Visualiser  |  Page 14
+8. DEMO DAY — Friday 9 May 2026
+You have 8 minutes. The tool must be running live on your laptop. No slides-only presentations. Real features,
+real data, live AI calls.
+Segment
+Time
+ What to Do and Say
+ 
+Opening
+1 min
+State the problem in one sentence. Show architecture slide. Say 'Let me show you the live
+tool.'
+CRUD Demo
+2 min
+Create a record live, watch AI description appear. Update status. Show audit log. Mention
+email notification.
+AI Features
+2 min
+Click AI Recommend (read aloud). Generate Report (show SSE streaming). RAG query
+demo.
+UI + Analytics
+1 min
+Dashboard KPIs. Analytics charts. CSV export. Responsive design on mobile-sized window.
+Security
+1 min
+API call without JWT (show 401). Injection attempt (show 400). Reference SECURITY.md.
+State findings fixed.
+Q&A;
+1 min
+Every member answers: What does it do? What AI? What is RAG? What security measures?
+Tool-05 — Risk Heatmap Visualiser  |  Page 15
+9. COMMON MISTAKES — Read This Now
+These 8 mistakes are made every sprint. Avoiding them saves days of wasted work.
+ Mistake
+ Why It Happens and How to Avoid It
+ 
+[X] Hardcoding secrets in
+config files
+Use ${ENV_VAR} in application.yml and os.getenv() in Python. Actual values go only in
+.env (which is in .gitignore). If you commit a secret to GitHub, rotate it immediately —
+deleting the file is not enough.
+[X] Committing .env to
+GitHub
+Add .env to .gitignore on Day 1 before any commit. Run git status before every git
+commit to verify. GitHub scans for exposed keys and will warn you, but by then it is
+already public.
+[X] Not wrapping Groq calls
+in try-except
+The Groq free tier has rate limits and occasional outages. Every call must be in a
+try-except block. On failure: log the error, return the fallback template with {is_fallback:
+true}. Never return HTTP 500 because the AI is unavailable.
+[X] Not setting up
+docker-compose until Week
+3
+Set it up on Day 5. The most common Demo Day failure is 'works on my laptop but not
+the demo machine.' Test the full docker-compose stack every day from Day 5 onwards.
+Discover integration problems early.
+[X] Adding features in Week
+4
+Week 4 is for demo preparation only. Feature freeze after Day 15. Every hour building
+features in Week 4 is an hour not spent making the demo flawless. New ideas go in
+GitHub Issues labelled post-sprint.
+[X] Empty database on
+Demo Day
+Implement the DataLoader seeder on Day 14. On Demo Day: docker-compose down -v
+then docker-compose up to reset to a clean seeded state. An empty list on Demo Day
+undermines the entire presentation.
+[X] Not reading Groq docs
+before writing AI code
+Spend 30 minutes at console.groq.com/docs before Day 2. Key parameters: model
+name, temperature (0.3 for factual, 0.7 for creative), max_tokens, and the messages
+array structure. Misunderstanding temperature alone can waste an entire day.
+[X] Skipping the demo dry
+run
+Every team that skips the rehearsal on Day 17 regrets it. Problems are always found in
+rehearsal that you never noticed before. Do two full rehearsals (Day 17 and Day 19).
+Use a stopwatch. The time limit is firm.
+ Tool-05 — Risk Heatmap Visualiser | Capstone Project | Sprint: 14 April – 9 May 2026
+ 

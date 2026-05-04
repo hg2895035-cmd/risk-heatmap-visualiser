@@ -46,7 +46,7 @@ public class RiskServiceImpl implements RiskService {
         Risk savedRisk = riskRepository.save(risk);
         
         if (savedRisk.getAssigneeEmail() != null && !savedRisk.getAssigneeEmail().isEmpty()) {
-            emailService.sendCreationEmail(savedRisk.getAssigneeEmail(), savedRisk.getTitle());
+            emailService.sendRiskCreatedEmail(savedRisk.getAssigneeEmail(), savedRisk.getTitle(), savedRisk.getId());
         }
 
         return mapToDto(savedRisk);
