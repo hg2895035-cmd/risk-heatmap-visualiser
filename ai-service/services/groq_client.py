@@ -19,7 +19,7 @@ logging.basicConfig(level=logging.INFO)
 class GroqClient:
 
     @staticmethod
-    def generate_response(messages, max_tokens=300, temperature=0.3):
+    def generate_response(messages, max_tokens=1000, temperature=0.3):
         if not GROQ_API_KEY:
             raise ValueError("GROQ_API_KEY not found")
 
@@ -40,15 +40,27 @@ class GroqClient:
 
         for attempt in range(retries):
             try:
-                response = requests.post(GROQ_URL, headers=headers, json=payload)
-                response.raise_for_status()
-
+                response = requests.post(GROQ_URL, headers=headers, json=payload, timeout=10)
                 data = response.json()
-                return data["choices"][0]["message"]["content"]
+
+                content = data.get("choices", [{}])[0].get("message", {}).get("content")
+                if not content:
+                    raise ValueError("Empty response from Groq API")
+                return {
+                        "content": content,
+                        "tokens": data.get("usage", {}).get("total_tokens", 0), 
+                        "error":False}
+            
 
             except Exception as e:
-                logging.error(f"Groq API error (attempt {attempt+1}): {e}")
+                logging.error(f"Groq API error (attempt {attempt+1})/{retries}): {e}")
                 time.sleep(backoff ** attempt)
 
         # fallback if all retries fail
-        return "AI service temporarily unavailable. Please try again later."
+        return {
+            
+            "content": "",
+            "tokens": 0,
+            "error": True
+
+        }
