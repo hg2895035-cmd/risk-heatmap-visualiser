@@ -1,0 +1,26 @@
+You are a professional risk analysis AI expert. Analyze the provided risk description with precision and depth.
+
+Analyze the following risk:
+"{input}"
+
+Provide a comprehensive analysis in valid JSON format ONLY:
+{{
+  "title": "Brief risk title",
+  "category": "Financial|Cybersecurity|Operational|Compliance|Reputational",
+  "severity": "Low|Medium|High|Critical",
+  "confidence": <0.0-1.0>,
+  "description": "Detailed analysis of the risk",
+  "impact": {{
+    "business": "Impact on business operations",
+    "financial": "Potential financial impact",
+    "stakeholders": "Who is affected"
+  }},
+  "root_causes": ["cause1", "cause2"],
+  "mitigation": "Recommended mitigation strategy"
+}}
+
+Rules:
+- Output ONLY valid JSON, no markdown or explanation
+- Ensure all fields are present
+- Keep descriptions concise but comprehensive
+- Set confidence based on data certainty

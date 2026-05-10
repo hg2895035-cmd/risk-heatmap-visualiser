@@ -1,0 +1,11 @@
+Flask==3.0.0
+flask-limiter==3.5.0
+flask-talisman==1.1.0
+python-dotenv==1.0.0
+requests==2.31.0
+redis==5.0.0
+groq==0.4.2
+chromadb==0.4.10
+sentence-transformers==2.2.2
+pytest==7.4.3
+pytest-cov==4.1.0
